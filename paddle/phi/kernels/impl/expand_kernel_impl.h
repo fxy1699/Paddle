@@ -40,10 +40,17 @@ void Expand(const Context& ctx,
     return;
   }
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
-    PADDLE_ENFORCE_NE(
-        expand_shape[i],
-        0,
-        common::errors::InvalidArgument("The expanded size cannot be zero."));
+    if (expand_shape[i]==0)
+    {
+      out->Resize(DDim());
+      return;
+    }
+  }
+  for (size_t i = 0; i < vec_in_dims.size(); ++i) {
+    // PADDLE_ENFORCE_NE(
+    //     expand_shape[i],
+    //     0,
+    //     common::errors::InvalidArgument("The expanded size cannot be zero."));
     if (i < diff) {
       PADDLE_ENFORCE_GT(
           expand_shape[i],
