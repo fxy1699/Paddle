@@ -39,28 +39,8 @@ void Expand(const Context& ctx,
     phi::Copy<Context>(ctx, x, ctx.GetPlace(), false, out);
     return;
   }
-  // for (size_t i = 0; i < vec_in_dims.size(); ++i) {
-  //   if (expand_shape[i]==0)
-  //   {
-  //     out->Resize(phi::make_ddim(std::vector<int>(expand_shape.size(), 0)));
-  //     return;
-  //   }
-  // }
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
-    // PADDLE_ENFORCE_NE(
-    //     expand_shape[i],
-    //     0,
-    //     common::errors::InvalidArgument("The expanded size cannot be zero."));
-    // if (i < diff) {
-    //   PADDLE_ENFORCE_GE(
-    //       expand_shape[i],
-    //       -1,
-    //       common::errors::InvalidArgument(
-    //           "The expanded size (%d) for non-existing dimensions must be "
-    //           "positive for expand_v2 op.",
-    //           expand_shape[i]));
-    //   repeat_times[i] = expand_shape[i];
-    // } else 
+
     if (expand_shape[i] == 0){
       repeat_times[i] = 0;
     } 
@@ -81,16 +61,7 @@ void Expand(const Context& ctx,
     } else if (expand_shape[i] == -1) {
       repeat_times[i] = 1; 
     }
-    // else {
-    //   PADDLE_ENFORCE_EQ(
-    //       expand_shape[i],
-    //       -1,
-    //       common::errors::InvalidArgument(
-    //           "When the value in shape is negative for expand_v2 op, "
-    //           "only -1 is supported, but the value received is %d.",
-    //           expand_shape[i]));
-    //   repeat_times[i] = 1;
-    // }
+
   }
   Eigen::DSizes<Eigen::DenseIndex, Rank> bcast_dims;
   for (size_t i = 0; i < repeat_times.size(); ++i) {
