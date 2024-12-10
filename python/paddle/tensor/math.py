@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import builtins
 import math
 import warnings
 from typing import TYPE_CHECKING, Literal
@@ -7997,6 +7998,10 @@ def copysign(x: Tensor, y: Tensor | float, name: str | None = None) -> Tensor:
     """
     if isinstance(y, (float, int)):
         y = paddle.to_tensor(y, dtype=x.dtype)
+    if x.numel() == 0 or y.numel() == 0:
+        out_shape = paddle.broadcast_shape(x.shape, y.shape)
+        out_shape = [builtins.max(0, dim) for dim in out_shape]
+        return paddle.empty(shape=out_shape, dtype=x.dtype)
     out_shape = broadcast_shape(x.shape, y.shape)
     if out_shape != list(x.shape):
         warnings.warn(
