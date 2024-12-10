@@ -39,13 +39,13 @@ void Expand(const Context& ctx,
     phi::Copy<Context>(ctx, x, ctx.GetPlace(), false, out);
     return;
   }
-  for (size_t i = 0; i < vec_in_dims.size(); ++i) {
-    if (expand_shape[i]==0)
-    {
-      out->Resize(phi::make_ddim(std::vector<int>(expand_shape.size(), 0)));
-      return;
-    }
-  }
+  // for (size_t i = 0; i < vec_in_dims.size(); ++i) {
+  //   if (expand_shape[i]==0)
+  //   {
+  //     out->Resize(phi::make_ddim(std::vector<int>(expand_shape.size(), 0)));
+  //     return;
+  //   }
+  // }
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
     // PADDLE_ENFORCE_NE(
     //     expand_shape[i],
@@ -61,7 +61,10 @@ void Expand(const Context& ctx,
     //           expand_shape[i]));
     //   repeat_times[i] = expand_shape[i];
     // } else 
-    if (expand_shape[i] > 0) {
+    if (expand_shape[i] == 0){
+      repeat_times[i] = 0;
+    } 
+    else if (expand_shape[i] > 0) {
       if (vec_in_dims[i] != 1) {
         PADDLE_ENFORCE_EQ(
             vec_in_dims[i],
@@ -75,8 +78,6 @@ void Expand(const Context& ctx,
       } else {
         repeat_times[i] = expand_shape[i];
       }
-    } else if (expand_shape[i] == 0){
-      repeat_times[i] = 0;
     } else if (expand_shape[i] == -1) {
       repeat_times[i] = 1; 
     }
@@ -132,6 +133,8 @@ void ExpandKernel(const Context& ctx,
                   const IntArray& shape,
                   DenseTensor* out) {
   auto rank = x.dims().size();
+  auto expand_shape = shape.GetData();
+  auto shape_size = expand_shape.size();
   PADDLE_ENFORCE_GE(
       rank,
       0,
@@ -147,8 +150,6 @@ void ExpandKernel(const Context& ctx,
           "or equal to %d, but the value received is %d.",
           MAX_RANK_SUPPORTED,
           rank));
-  auto expand_shape = shape.GetData();
-  auto shape_size = expand_shape.size();
   PADDLE_ENFORCE_GE(
       shape_size,
       rank,
