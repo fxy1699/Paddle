@@ -32,20 +32,9 @@ void ExpandKernel(const Context& ctx,
   vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
   std::vector<int> final_expand_shape(vec_in_dims.size());
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
-    PADDLE_ENFORCE_NE(
-        expand_shape[i],
-        0,
-        common::errors::InvalidArgument("The expanded size cannot be zero."));
-    if (i < diff) {  // expand_shape = [3,4,-1,-1], X = [10,2] -->
+    if (expand_shape[i] == 0) {  // expand_shape = [3,4,-1,-1], X = [10,2] -->
                      // final_expand_shape = [3,4,10,2]
-      PADDLE_ENFORCE_GT(
-          expand_shape[i],
-          0,
-          common::errors::InvalidArgument(
-              "The expanded size (%d) for non-existing dimensions must be "
-              "positive for expand_v2 op.",
-              expand_shape[i]));
-      final_expand_shape[i] = expand_shape[i];
+      final_expand_shape[i] = 0;
     } else if (expand_shape[i] > 0) {  // expand_shape = [3,4,10,4], X =
                                        // [10,1] --> final_expand_shape =
                                        // [3,4,10,4]
@@ -64,14 +53,9 @@ void ExpandKernel(const Context& ctx,
       }
     } else {  // expand_shape = [3,4,-1,-1], X = [10,2] --> final_expand_shape
               // = [3,4,10,2]
-      PADDLE_ENFORCE_EQ(
-          expand_shape[i],
-          -1,
-          common::errors::InvalidArgument(
-              "When the value in shape is negative for expand_v2 op, "
-              "only -1 is supported, but the value received is %d.",
-              expand_shape[i]));
       final_expand_shape[i] = vec_in_dims[i];
+    } else if (expand_shape[i] == -1){
+      final_expand_shape[i] = 1;
     }
   }
 
