@@ -56,6 +56,9 @@ class TestBroadcastToAPI(unittest.TestCase):
             input = np.random.random([12, 14]).astype("float32")
             x = paddle.static.data(name='x', shape=[12, 14], dtype="float32")
 
+            zero_size_input = np.random.random([0, 14]).astype("float32")
+            x_zero = paddle.static.data(name='x_zero', shape=[0, 14], dtype="float32")
+
             positive_2 = paddle.tensor.fill_constant([1], "int32", 12)
             expand_shape = paddle.static.data(
                 name="expand_shape",
@@ -66,20 +69,23 @@ class TestBroadcastToAPI(unittest.TestCase):
             out_1 = paddle.broadcast_to(x, shape=[12, 14])
             out_2 = paddle.broadcast_to(x, shape=[positive_2, 14])
             out_3 = paddle.broadcast_to(x, shape=expand_shape)
+            out_4 = paddle.broadcast_to(x_zero, shape=[0, 14])
 
             g0 = base.backward.gradients(out_2, x)
 
             exe = base.Executor(place=base.CPUPlace())
-            res_1, res_2, res_3 = exe.run(
+            res_1, res_2, res_3 , res_4= exe.run(
                 feed={
                     "x": input,
+                    "x_zero": zero_size_input,
                     "expand_shape": np.array([12, 14]).astype("int32"),
                 },
-                fetch_list=[out_1, out_2, out_3],
+                fetch_list=[out_1, out_2, out_3, out_4],
             )
             np.testing.assert_array_equal(res_1, np.tile(input, (1, 1)))
             np.testing.assert_array_equal(res_2, np.tile(input, (1, 1)))
             np.testing.assert_array_equal(res_3, np.tile(input, (1, 1)))
+            np.testing.assert_array_equal(res_4, zero_size_input)
 
     def test_api_fp16_gpu(self):
         if paddle.base.core.is_compiled_with_cuda():
@@ -92,6 +98,9 @@ class TestBroadcastToAPI(unittest.TestCase):
                     name="x", shape=[12, 14], dtype="float16"
                 )
 
+                zero_size_input = np.random.random([0, 14]).astype("float32")
+                x_zero = paddle.static.data(name='x_zero', shape=[0, 14], dtype="float32")
+
                 positive_2 = paddle.tensor.fill_constant([1], "int32", 12)
                 expand_shape = paddle.static.data(
                     name="expand_shape",
@@ -102,19 +111,23 @@ class TestBroadcastToAPI(unittest.TestCase):
                 out_1 = paddle.broadcast_to(x, shape=[12, 14])
                 out_2 = paddle.broadcast_to(x, shape=[positive_2, 14])
                 out_3 = paddle.broadcast_to(x, shape=expand_shape)
+                out_4 = paddle.broadcast_to(x_zero, shape=[0, 14])
 
                 exe = paddle.static.Executor(place)
-                res_1, res_2, res_3 = exe.run(
+                res_1, res_2, res_3 , res_4= exe.run(
                     paddle.static.default_main_program(),
                     feed={
                         "x": input,
+                        "x_zero": zero_size_input,
                         "expand_shape": np.array([12, 14]).astype("int32"),
                     },
-                    fetch_list=[out_1, out_2, out_3],
+                    fetch_list=[out_1, out_2, out_3, out_4],
                 )
                 np.testing.assert_array_equal(res_1, np.tile(input, (1, 1)))
                 np.testing.assert_array_equal(res_2, np.tile(input, (1, 1)))
                 np.testing.assert_array_equal(res_3, np.tile(input, (1, 1)))
+                np.testing.assert_array_equal(res_4, zero_size_input)
+    
 
 
 if __name__ == "__main__":
