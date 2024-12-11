@@ -7998,7 +7998,7 @@ def copysign(x: Tensor, y: Tensor | float, name: str | None = None) -> Tensor:
     """
     if isinstance(y, (float, int)):
         y = paddle.to_tensor(y, dtype=x.dtype)
-    if x.numel() == 0 or y.numel() == 0:
+    if paddle.in_dynamic_mode() and (x.numel() == 0 or y.numel() == 0):
         out_shape = paddle.broadcast_shape(x.shape, y.shape)
         out_shape = [builtins.max(0, dim) for dim in out_shape]
         return paddle.empty(shape=out_shape, dtype=x.dtype)
@@ -8007,7 +8007,6 @@ def copysign(x: Tensor, y: Tensor | float, name: str | None = None) -> Tensor:
         warnings.warn(
             f"The shape of broadcast output {out_shape} is different from the input tensor x with shape: {x.shape}, please make sure you are using copysign api correctly."
         )
-
     if in_dynamic_or_pir_mode():
         return _C_ops.copysign(x, y)
     else:
