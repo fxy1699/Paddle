@@ -32,7 +32,9 @@ void ExpandKernel(const Context& ctx,
   auto out_shape = common::vectorize<int64_t>(x.dims());
   out_shape.insert(out_shape.begin(), diff, 1);
   for (size_t i = 0; i < out_shape.size(); ++i) {
-    if (expand_shape[i] == 0) {
+    if (expand_shape[i] == -1) {
+      out_shape[i] = vec_in_dims[i];
+    } else if (expand_shape[i] == 0) {
       out_shape[i] = 0;
     } else if (expand_shape[i] > 0) {
       PADDLE_ENFORCE_EQ(
@@ -45,8 +47,6 @@ void ExpandKernel(const Context& ctx,
               vec_in_dims[i],
               expand_shape[i]));
       out_shape[i] = expand_shape[i];
-    } else if (expand_shape[i] == -1) {
-      out_shape[i] = vec_in_dims[i];
     }
   }
 
