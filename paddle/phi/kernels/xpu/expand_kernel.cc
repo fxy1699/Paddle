@@ -33,7 +33,7 @@ void ExpandKernel(const Context& ctx,
   std::vector<int> final_expand_shape(vec_in_dims.size());
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
     if (expand_shape[i] == 0) {  // expand_shape = [3,4,-1,-1], X = [10,2] -->
-                     // final_expand_shape = [3,4,10,2]
+                                 // final_expand_shape = [3,4,10,2]
       final_expand_shape[i] = 0;
     } else if (expand_shape[i] > 0) {  // expand_shape = [3,4,10,4], X =
                                        // [10,1] --> final_expand_shape =
@@ -51,11 +51,11 @@ void ExpandKernel(const Context& ctx,
       } else {
         final_expand_shape[i] = expand_shape[i];
       }
+    } else if (expand_shape[i] == -1) {
+      final_expand_shape[i] = 1;
     } else {  // expand_shape = [3,4,-1,-1], X = [10,2] --> final_expand_shape
               // = [3,4,10,2]
       final_expand_shape[i] = vec_in_dims[i];
-    } else if (expand_shape[i] == -1){
-      final_expand_shape[i] = 1;
     }
   }
 
