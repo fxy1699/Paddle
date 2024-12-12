@@ -40,11 +40,9 @@ void Expand(const Context& ctx,
     return;
   }
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
-
-    if (expand_shape[i] == 0){
+    if (expand_shape[i] == 0) {
       repeat_times[i] = 0;
-    } 
-    else if (expand_shape[i] > 0) {
+    } else if (expand_shape[i] > 0) {
       if (vec_in_dims[i] != 1) {
         PADDLE_ENFORCE_EQ(
             vec_in_dims[i],
@@ -59,9 +57,8 @@ void Expand(const Context& ctx,
         repeat_times[i] = expand_shape[i];
       }
     } else if (expand_shape[i] == -1) {
-      repeat_times[i] = 1; 
+      repeat_times[i] = 1;
     }
-
   }
   Eigen::DSizes<Eigen::DenseIndex, Rank> bcast_dims;
   for (size_t i = 0; i < repeat_times.size(); ++i) {
