@@ -32,9 +32,9 @@ void ExpandKernel(const Context& ctx,
   vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
   std::vector<int> final_expand_shape(vec_in_dims.size());
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
-    if (expand_shape[i] == -1) {  // 继承输入维度大小
+    if (expand_shape[i] == -1) {
       final_expand_shape[i] = vec_in_dims[i];
-    } else if (expand_shape[i] == 0) {  // 输出维度为 0
+    } else if (expand_shape[i] == 0) {
       final_expand_shape[i] = 0;
     } else if (expand_shape[i] > 0) {
       PADDLE_ENFORCE_EQ(

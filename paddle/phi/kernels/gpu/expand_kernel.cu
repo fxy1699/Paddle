@@ -35,21 +35,18 @@ void ExpandKernel(const Context& ctx,
     if (expand_shape[i] == 0) {
       out_shape[i] = 0;
     } else if (expand_shape[i] > 0) {
-      if (out_shape[i] != 1) {
-        PADDLE_ENFORCE_EQ(
-            out_shape[i],
-            expand_shape[i],
-            common::errors::InvalidArgument(
-                "The value (%d) of the non-singleton dimension does not match"
-                " the corresponding value (%d) in shape for expand kernel.",
-                out_shape[i],
-                expand_shape[i]));
-        out_shape[i] = 1;
-      } else {
-        out_shape[i] = expand_shape[i];
-      }
+      PADDLE_ENFORCE_EQ(
+          vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
+          true,
+          common::errors::InvalidArgument(
+              "The %d-th dimension of input tensor (%d) must match or be "
+              "broadcastable to the corresponding dimension (%d) in shape.",
+              i,
+              vec_in_dims[i],
+              expand_shape[i]));
+      out_shape[i] = expand_shape[i];
     } else if (expand_shape[i] == -1) {
-      out_shape[i] = 1;
+      out_shape[i] = vec_in_dims[i];
     }
   }
 
