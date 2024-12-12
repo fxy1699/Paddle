@@ -57,7 +57,9 @@ class TestBroadcastToAPI(unittest.TestCase):
             x = paddle.static.data(name='x', shape=[12, 14], dtype="float32")
 
             zero_size_input = np.random.random([0, 14]).astype("float32")
-            x_zero = paddle.static.data(name='x_zero', shape=[0, 14], dtype="float32")
+            x_zero = paddle.static.data(
+                name='x_zero', shape=[0, 14], dtype="float32"
+            )
 
             positive_2 = paddle.tensor.fill_constant([1], "int32", 12)
             expand_shape = paddle.static.data(
@@ -74,7 +76,7 @@ class TestBroadcastToAPI(unittest.TestCase):
             g0 = base.backward.gradients(out_2, x)
 
             exe = base.Executor(place=base.CPUPlace())
-            res_1, res_2, res_3 , res_4= exe.run(
+            res_1, res_2, res_3, res_4 = exe.run(
                 feed={
                     "x": input,
                     "x_zero": zero_size_input,
@@ -99,7 +101,9 @@ class TestBroadcastToAPI(unittest.TestCase):
                 )
 
                 zero_size_input = np.random.random([0, 14]).astype("float32")
-                x_zero = paddle.static.data(name='x_zero', shape=[0, 14], dtype="float32")
+                x_zero = paddle.static.data(
+                    name='x_zero', shape=[0, 14], dtype="float32"
+                )
 
                 positive_2 = paddle.tensor.fill_constant([1], "int32", 12)
                 expand_shape = paddle.static.data(
@@ -114,7 +118,7 @@ class TestBroadcastToAPI(unittest.TestCase):
                 out_4 = paddle.broadcast_to(x_zero, shape=[0, 14])
 
                 exe = paddle.static.Executor(place)
-                res_1, res_2, res_3 , res_4= exe.run(
+                res_1, res_2, res_3, res_4 = exe.run(
                     paddle.static.default_main_program(),
                     feed={
                         "x": input,
@@ -127,7 +131,6 @@ class TestBroadcastToAPI(unittest.TestCase):
                 np.testing.assert_array_equal(res_2, np.tile(input, (1, 1)))
                 np.testing.assert_array_equal(res_3, np.tile(input, (1, 1)))
                 np.testing.assert_array_equal(res_4, zero_size_input)
-    
 
 
 if __name__ == "__main__":
