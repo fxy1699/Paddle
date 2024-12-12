@@ -47,7 +47,7 @@ void ExpandKernel(const Context& ctx,
                 " the corresponding value (%d) in shape for expand_v2 op.",
                 vec_in_dims[i],
                 expand_shape[i]));
-        final_expand_shape[i] = expand_shape[i];
+        final_expand_shape[i] = 1;
       } else {
         final_expand_shape[i] = expand_shape[i];
       }
