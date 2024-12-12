@@ -32,30 +32,21 @@ void ExpandKernel(const Context& ctx,
   vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
   std::vector<int> final_expand_shape(vec_in_dims.size());
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
-    if (expand_shape[i] == 0) {  // expand_shape = [3,4,-1,-1], X = [10,2] -->
-                                 // final_expand_shape = [3,4,10,2]
-      final_expand_shape[i] = 0;
-    } else if (expand_shape[i] > 0) {  // expand_shape = [3,4,10,4], X =
-                                       // [10,1] --> final_expand_shape =
-                                       // [3,4,10,4]
-      if (vec_in_dims[i] != 1) {
-        PADDLE_ENFORCE_EQ(
-            vec_in_dims[i],
-            expand_shape[i],
-            common::errors::InvalidArgument(
-                "The value (%d) of the non-singleton dimension does not match"
-                " the corresponding value (%d) in shape for expand_v2 op.",
-                vec_in_dims[i],
-                expand_shape[i]));
-        final_expand_shape[i] = 1;
-      } else {
-        final_expand_shape[i] = expand_shape[i];
-      }
-    } else if (expand_shape[i] == -1) {
-      final_expand_shape[i] = 1;
-    } else {  // expand_shape = [3,4,-1,-1], X = [10,2] --> final_expand_shape
-              // = [3,4,10,2]
+    if (expand_shape[i] == -1) {  // 继承输入维度大小
       final_expand_shape[i] = vec_in_dims[i];
+    } else if (expand_shape[i] == 0) {  // 输出维度为 0
+      final_expand_shape[i] = 0;
+    } else if (expand_shape[i] > 0) {
+      PADDLE_ENFORCE_EQ(
+          vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
+          true,
+          common::errors::InvalidArgument(
+              "The %d-th dimension of input tensor (%d) must match or be "
+              "broadcastable to the corresponding dimension (%d) in shape.",
+              i,
+              vec_in_dims[i],
+              expand_shape[i]));
+      final_expand_shape[i] = expand_shape[i];
     }
   }
 
