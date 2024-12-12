@@ -27,10 +27,12 @@ void ExpandKernel(const Context& ctx,
                   const DenseTensor& x,
                   const IntArray& shape,
                   DenseTensor* out) {
+  auto in_dims = x.dims();
   auto expand_shape = shape.GetData();
-  auto diff = expand_shape.size() - x.dims().size();
-  auto out_shape = common::vectorize<int64_t>(x.dims());
-  out_shape.insert(out_shape.begin(), diff, 1);
+  auto vec_in_dims = common::vectorize<int>(in_dims);
+  auto diff = expand_shape.size() - vec_in_dims.size();
+  vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
+  std::vector<int> out_shape(vec_in_dims.size());
   for (size_t i = 0; i < out_shape.size(); ++i) {
     if (expand_shape[i] == -1) {
       out_shape[i] = vec_in_dims[i];
