@@ -44,11 +44,11 @@ void ExpandKernel(const Context& ctx,
                 " the corresponding value (%d) in shape for expand kernel.",
                 out_shape[i],
                 expand_shape[i]));
-        out_shape[i] = expand_shape[i];         
+        out_shape[i] = expand_shape[i];
       } else {
         out_shape[i] = expand_shape[i];
       }
-    } else if (expand_shape[i] == -1){
+    } else if (expand_shape[i] == -1) {
       out_shape[i] = 1;
     }
   }
