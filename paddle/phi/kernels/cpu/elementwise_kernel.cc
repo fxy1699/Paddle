@@ -83,24 +83,26 @@ void CopySignKernel(const Context& dev_ctx,
                     const DenseTensor& x,
                     const DenseTensor& y,
                     DenseTensor* out) {
+  auto x_dims = x.dims();
+  auto y_dims = y.dims();
+
   if (x.numel() == 0 && y.numel() != 0) {
-    out->Resize(x.dims());
+    out->Resize(x_dims);
     dev_ctx.template Alloc<T>(out);
     return;
   }
   if (x.numel() != 0 && y.numel() == 0) {
-    out->Resize(y.dims());
+    out->Resize(y_dims);
     dev_ctx.template Alloc<T>(out);
     return;
   }
   if (x.numel() == 0 && y.numel() == 0) {
+    std::vector<int64_t> out_shape(x_dims.Get(), x_dims.Get() + x_dims.size());
     out->Resize({0});
     dev_ctx.template Alloc<T>(out);
     return;
   }
   dev_ctx.template Alloc<T>(out);
-  auto x_dims = x.dims();
-  auto y_dims = y.dims();
   if (x_dims.size() >= y_dims.size()) {
     funcs::ElementwiseCompute<funcs::CopySignFunctor<T>, T>(
         dev_ctx, x, y, funcs::CopySignFunctor<T>(), out);
