@@ -83,6 +83,21 @@ void CopySignKernel(const Context& dev_ctx,
                     const DenseTensor& x,
                     const DenseTensor& y,
                     DenseTensor* out) {
+  if (x.numel() == 0 && y.numel() != 0) {
+    out->Resize(x.dims());
+    dev_ctx.template Alloc<T>(out);
+    return;
+  }
+  if (x.numel() != 0 && y.numel() == 0) {
+    out->Resize(y.dims());
+    dev_ctx.template Alloc<T>(out);
+    return;
+  }
+  if (x.numel() == 0 && y.numel() == 0) {
+    out->Resize({0});
+    dev_ctx.template Alloc<T>(out);
+    return;
+  }
   dev_ctx.template Alloc<T>(out);
   auto x_dims = x.dims();
   auto y_dims = y.dims();
