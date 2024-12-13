@@ -83,45 +83,47 @@ void CopySignKernel(const Context& dev_ctx,
                     const DenseTensor& x,
                     const DenseTensor& y,
                     DenseTensor* out) {
-  auto x_dims = x.dims();
-  auto y_dims = y.dims();
-  if (x.numel() == 0 && y.numel() == 0) {
-    if (x_dims == y_dims) {
-      out->Resize(x_dims);
-      dev_ctx.template Alloc<T>(out);
-      return;
-    }
-    auto out_dims = common::vectorize<int>(x_dims);
-    auto change_dims = common::vectorize<int>(y_dims);
-    // std::vector<int64_t> out_shape(y_dims.Get(), y_dims.Get() +
-    // y_dims.size()); out->Resize(common::make_ddim(out_shape));
-    std::cout << "yes" << std::endl;
-    if (out_dims.size() < change_dims.size()) {
-      out_dims = common::vectorize<int>(y_dims);
-      change_dims = common::vectorize<int>(x_dims);
-    }
-    for (size_t i = change_dims.size(); i >= 1; i--) {
-      out_dims[out_dims.size() - i] *= change_dims[change_dims.size() - i];
-      std::cout << out_dims.size() - i << " " << out_dims[out_dims.size() - i]
-                << std::endl;
-    }
-    DDim new_out_dims = common::make_ddim(out_dims);
-    out->Resize(new_out_dims);
-    dev_ctx.template Alloc<T>(out);
-    return;
+  auto in_dims = x.dims();
+  auto expand_shape = y.dims();
+  if (in_dims.size() > expand_shape.size()) {
+    in_dims = y.dims();
+    expand_shape = x.dims();
   }
-  if (x.numel() == 0 && y.numel() != 0) {
-    out->Resize(x_dims);
-    dev_ctx.template Alloc<T>(out);
-    return;
-  }
-  if (x.numel() != 0 && y.numel() == 0) {
-    out->Resize(y_dims);
+  auto vec_in_dims = common::vectorize<int>(in_dims);
+  auto diff = expand_shape.size() - vec_in_dims.size();
+  vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
+  std::vector<int> repeat_times(vec_in_dims.size());
+  if (x.numel() == 0 || y.numel() == 0) {
+    for (size_t i = 0; i < vec_in_dims.size(); ++i) {
+      if (expand_shape[i] == 0) {
+        repeat_times[i] = 0;
+      } else if (expand_shape[i] > 0) {
+        if (vec_in_dims[i] != 1) {
+          repeat_times[i] = 1;
+        } else {
+          repeat_times[i] = expand_shape[i];
+        }
+      } else if (expand_shape[i] == -1) {
+        repeat_times[i] = 1;
+      }
+    }
+    DDim new_in_dims = common::make_ddim(vec_in_dims);
+    DDim out_dims(new_in_dims);
+    for (size_t i = 0; i < repeat_times.size(); ++i) {
+      if (repeat_times[i] == 0) {
+        out_dims[i] = 0;
+      } else if (expand_shape[i] == -1) {
+        out_dims[i] = new_in_dims[i];
+      } else {
+        out_dims[i] *= repeat_times[i];
+      }
+    }
+    out->Resize(out_dims);
     dev_ctx.template Alloc<T>(out);
     return;
   }
   dev_ctx.template Alloc<T>(out);
-  if (x_dims.size() >= y_dims.size()) {
+  if (x.dims().size() >= y.dims().size()) {
     funcs::ElementwiseCompute<funcs::CopySignFunctor<T>, T>(
         dev_ctx, x, y, funcs::CopySignFunctor<T>(), out);
   } else {
