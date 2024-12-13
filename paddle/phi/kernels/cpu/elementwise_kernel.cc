@@ -85,7 +85,31 @@ void CopySignKernel(const Context& dev_ctx,
                     DenseTensor* out) {
   auto x_dims = x.dims();
   auto y_dims = y.dims();
-
+  if (x.numel() == 0 && y.numel() == 0) {
+    if (x_dims == y_dims) {
+      out->Resize(x_dims);
+      dev_ctx.template Alloc<T>(out);
+      return;
+    }
+    auto out_dims = common::vectorize<int>(x_dims);
+    auto change_dims = common::vectorize<int>(y_dims);
+    // std::vector<int64_t> out_shape(y_dims.Get(), y_dims.Get() +
+    // y_dims.size()); out->Resize(common::make_ddim(out_shape));
+    std::cout << "yes" << std::endl;
+    if (out_dims.size() < change_dims.size()) {
+      out_dims = common::vectorize<int>(y_dims);
+      change_dims = common::vectorize<int>(x_dims);
+    }
+    for (size_t i = change_dims.size(); i >= 1; i--) {
+      out_dims[out_dims.size() - i] *= change_dims[change_dims.size() - i];
+      std::cout << out_dims.size() - i << " " << out_dims[out_dims.size() - i]
+                << std::endl;
+    }
+    DDim new_out_dims = common::make_ddim(out_dims);
+    out->Resize(new_out_dims);
+    dev_ctx.template Alloc<T>(out);
+    return;
+  }
   if (x.numel() == 0 && y.numel() != 0) {
     out->Resize(x_dims);
     dev_ctx.template Alloc<T>(out);
@@ -93,18 +117,6 @@ void CopySignKernel(const Context& dev_ctx,
   }
   if (x.numel() != 0 && y.numel() == 0) {
     out->Resize(y_dims);
-    dev_ctx.template Alloc<T>(out);
-    return;
-  }
-  if (x.numel() == 0 && y.numel() == 0) {
-    // std::vector<int64_t> out_shape(y_dims.Get(), y_dims.Get() +
-    // y_dims.size()); out->Resize(common::make_ddim(out_shape));
-    auto out_dims = x_dims;
-    if (out_dims.size() < y_dims.size()) {
-      out_dims = y_dims;
-    }
-    out_dims[-1] = 0;
-    out->Resize(out_dims);
     dev_ctx.template Alloc<T>(out);
     return;
   }
