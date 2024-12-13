@@ -97,10 +97,18 @@ void CopySignKernel(const Context& dev_ctx,
     return;
   }
   if (x.numel() == 0 && y.numel() == 0) {
-    std::vector<int64_t> out_shape(x_dims.Get(), x_dims.Get() + x_dims.size());
-    out->Resize({0});
-    dev_ctx.template Alloc<T>(out);
-    return;
+    // std::vector<int64_t> out_shape(y_dims.Get(), y_dims.Get() +
+    // y_dims.size()); out->Resize(common::make_ddim(out_shape));
+    if (x_dims.size() >= y_dims.size()) {
+      out->Resize(x_dims);
+      dev_ctx.template Alloc<T>(out);
+      return;
+    }
+    if (x_dims.size() < y_dims.size()) {
+      out->Resize(y_dims);
+      dev_ctx.template Alloc<T>(out);
+      return;
+    }
   }
   dev_ctx.template Alloc<T>(out);
   if (x_dims.size() >= y_dims.size()) {
