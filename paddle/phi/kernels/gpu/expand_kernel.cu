@@ -42,9 +42,11 @@ void ExpandKernel(const Context& ctx,
           vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
           true,
           common::errors::InvalidArgument(
-              "The %d-th dimension of input tensor (%d) must match be 0 or 1 ",
+              "The %d-th dimension of input tensor (%d) must match or be "
+              "broadcastable to the corresponding dimension (%d) in shape.",
               i,
-              vec_in_dims[i]));
+              vec_in_dims[i],
+              expand_shape[i]));
       out_shape[i] = 0;
       has_zero_dim = true;
     } else if (expand_shape[i] > 0) {
