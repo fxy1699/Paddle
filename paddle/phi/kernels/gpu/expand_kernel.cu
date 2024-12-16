@@ -29,15 +29,24 @@ void ExpandKernel(const Context& ctx,
                   DenseTensor* out) {
   auto in_dims = x.dims();
   auto expand_shape = shape.GetData();
-  auto vec_in_dims = common::vectorize<int>(in_dims);
+  auto vec_in_dims = common::vectorize<int64_t>(in_dims);
   auto diff = expand_shape.size() - vec_in_dims.size();
   vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
-  std::vector<int> out_shape(vec_in_dims.size());
+  auto out_shape = common::vectorize<int64_t>(vec_in_dims.size());
+  bool has_zero_dim = false;
   for (size_t i = 0; i < out_shape.size(); ++i) {
     if (expand_shape[i] == -1) {
       out_shape[i] = vec_in_dims[i];
     } else if (expand_shape[i] == 0) {
+      PADDLE_ENFORCE_EQ(
+          vec_in_dims[i],
+          0,
+          common::errors::InvalidArgument(
+              "The %d-th dimension of input tensor (%d) must match be 0 ",
+              i,
+              vec_in_dims[i]));
       out_shape[i] = 0;
+      has_zero_dim = true;
     } else if (expand_shape[i] > 0) {
       PADDLE_ENFORCE_EQ(
           vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
@@ -54,6 +63,9 @@ void ExpandKernel(const Context& ctx,
 
   out->Resize(common::make_ddim(out_shape));
   ctx.template Alloc<T>(out);
+  if (has_zero_dim) {
+    return;
+  }
   std::vector<const DenseTensor*> ins = {&x};
   std::vector<DenseTensor*> outs = {out};
   phi::funcs::BroadcastKernel<T>(ctx, ins, &outs, kps::IdentityFunctor<T>());

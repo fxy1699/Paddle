@@ -31,7 +31,7 @@ void Expand(const Context& ctx,
             DenseTensor* out) {
   auto in_dims = x.dims();
   auto expand_shape = shape.GetData();
-  auto vec_in_dims = common::vectorize<int>(in_dims);
+  auto vec_in_dims = common::vectorize<int64_t>(in_dims);
   auto diff = expand_shape.size() - vec_in_dims.size();
   vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
   std::vector<int> repeat_times(vec_in_dims.size());
@@ -39,8 +39,26 @@ void Expand(const Context& ctx,
     phi::Copy<Context>(ctx, x, ctx.GetPlace(), false, out);
     return;
   }
+  // if (in_dims.size() == 0){//标量
+  //   if(expand_shape.size() == 0){//当输入形状为()返回原标量
+  //     phi::Copy<Context>(ctx, x, ctx.GetPlace(), false, out);
+  //     return;
+  //   }
+  //   //当输入形状不为()返回expand_shape的0-size tensor
+  //   out->Resize(common::make_ddim(expand_shape));
+  //   ctx.template Alloc<T>(out);
+  //   return;
+  // }
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
-    if (expand_shape[i] == 0) {
+    if (expand_shape[i] == 0 && diff == 0) {
+      PADDLE_ENFORCE_EQ(
+          vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
+          true,
+          common::errors::InvalidArgument(
+              "The value (%d) of the non-singleton dimension does not match"
+              " the corresponding value (%d) in shape for expand_v2 op.",
+              vec_in_dims[i],
+              expand_shape[i]));
       repeat_times[i] = 0;
     } else if (expand_shape[i] > 0) {
       if (vec_in_dims[i] != 1) {

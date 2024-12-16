@@ -27,15 +27,24 @@ void ExpandKernel(const Context& ctx,
   using XPUType = typename XPUTypeTrait<T>::Type;
   auto in_dims = x.dims();
   auto expand_shape = shape.GetData();
-  auto vec_in_dims = common::vectorize<int>(in_dims);
+  auto vec_in_dims = common::vectorize<int64_t>(in_dims);
   auto diff = expand_shape.size() - vec_in_dims.size();
   vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
-  std::vector<int> final_expand_shape(vec_in_dims.size());
+  auto final_expand_shape = common::vectorize<int64_t>(vec_in_dims.size());
+  bool has_zero_dim = false;
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
     if (expand_shape[i] == -1) {
       final_expand_shape[i] = vec_in_dims[i];
     } else if (expand_shape[i] == 0) {
+      PADDLE_ENFORCE_EQ(
+          vec_in_dims[i],
+          0,
+          common::errors::InvalidArgument(
+              "The %d-th dimension of input tensor (%d) must match be 0 ",
+              i,
+              vec_in_dims[i]));
       final_expand_shape[i] = 0;
+      has_zero_dim = true;
     } else if (expand_shape[i] > 0) {
       PADDLE_ENFORCE_EQ(
           vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
@@ -72,6 +81,9 @@ void ExpandKernel(const Context& ctx,
   DDim out_dims = common::make_ddim(final_expand_shape);
   out->Resize(out_dims);
   ctx.template Alloc<T>(out);
+  if (has_zero_dim) {
+    return;
+  }
   auto& x_shape = vec_in_dims;
   auto out_shape = common::vectorize<int>(out_dims);
   if (shape_size == 0) {
