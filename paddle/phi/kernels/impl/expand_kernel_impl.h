@@ -39,18 +39,8 @@ void Expand(const Context& ctx,
     phi::Copy<Context>(ctx, x, ctx.GetPlace(), false, out);
     return;
   }
-  // if (in_dims.size() == 0){//标量
-  //   if(expand_shape.size() == 0){//当输入形状为()返回原标量
-  //     phi::Copy<Context>(ctx, x, ctx.GetPlace(), false, out);
-  //     return;
-  //   }
-  //   //当输入形状不为()返回expand_shape的0-size tensor
-  //   out->Resize(common::make_ddim(expand_shape));
-  //   ctx.template Alloc<T>(out);
-  //   return;
-  // }
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
-    if (expand_shape[i] == 0 && diff == 0) {
+    if (expand_shape[i] == 0) {
       PADDLE_ENFORCE_EQ(
           vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
           true,

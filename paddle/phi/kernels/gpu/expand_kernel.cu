@@ -39,10 +39,10 @@ void ExpandKernel(const Context& ctx,
       out_shape[i] = vec_in_dims[i];
     } else if (expand_shape[i] == 0) {
       PADDLE_ENFORCE_EQ(
-          vec_in_dims[i],
-          0,
+          vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
+          true,
           common::errors::InvalidArgument(
-              "The %d-th dimension of input tensor (%d) must match be 0 ",
+              "The %d-th dimension of input tensor (%d) must match be 0 or 1 ",
               i,
               vec_in_dims[i]));
       out_shape[i] = 0;
