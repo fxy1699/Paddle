@@ -96,6 +96,14 @@ void CopySignKernel(const Context& dev_ctx,
   if (x.numel() == 0 || y.numel() == 0) {
     for (size_t i = 0; i < vec_in_dims.size(); ++i) {
       if (expand_shape[i] == 0) {
+        PADDLE_ENFORCE_EQ(
+            vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
+            true,
+            common::errors::InvalidArgument(
+                "The value (%d) of the non-singleton dimension does not match"
+                " the corresponding value (%d) in shape for expand_v2 op.",
+                vec_in_dims[i],
+                expand_shape[i]));
         repeat_times[i] = 0;
       } else if (expand_shape[i] > 0) {
         if (vec_in_dims[i] != 1) {
