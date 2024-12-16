@@ -300,6 +300,35 @@ class TestCopySignBroadcastCase3(TestCopySignAPI):
         self.y = (np.random.randn(3, 4, 5) * 10).astype(dtype)
 
 
+class TestCopySignZeroDimCase(unittest.TestCase):
+    def setUp(self):
+        self.input_init()
+        self.place_init()
+
+    def input_init(self):
+        dtype = np.float16
+        self.x = np.array(1.23, dtype=dtype)
+        self.y = np.empty([0], dtype=dtype)
+
+    def place_init(self):
+        self.place = (
+            paddle.CUDAPlace(0)
+            if paddle.is_compiled_with_cuda()
+            else paddle.CPUPlace()
+        )
+
+    def test_dygraph_api(self):
+        paddle.disable_static()
+        x = paddle.to_tensor(self.x)
+        y = paddle.to_tensor(self.y)
+        out = paddle.copysign(x, y)
+        out_ref = ref_copysign(self.x, self.y)
+        np.testing.assert_allclose(out_ref, out.numpy())
+        out_ref_dtype = out_ref.dtype
+        np.testing.assert_equal((out_ref_dtype == out.numpy().dtype), True)
+        paddle.enable_static()
+
+
 if __name__ == "__main__":
     paddle.enable_static()
     unittest.main()
