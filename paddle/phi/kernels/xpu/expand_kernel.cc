@@ -30,7 +30,7 @@ void ExpandKernel(const Context& ctx,
   auto vec_in_dims = common::vectorize<int64_t>(in_dims);
   auto diff = expand_shape.size() - vec_in_dims.size();
   vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
-  auto final_expand_shape = common::vectorize<int64_t>(vec_in_dims);
+  auto final_expand_shape = vec_in_dims;
   bool has_zero_dim = false;
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
     if (expand_shape[i] == -1) {
