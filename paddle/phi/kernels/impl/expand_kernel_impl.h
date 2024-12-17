@@ -49,8 +49,7 @@ void Expand(const Context& ctx,
               "positive for expand_v2 op.",
               expand_shape[i]));
       repeat_times[i] = expand_shape[i];
-    }
-    if (expand_shape[i] == 0) {
+    } else if (expand_shape[i] == 0) {
       PADDLE_ENFORCE_EQ(
           vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
           true,
