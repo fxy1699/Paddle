@@ -44,8 +44,7 @@ void ExpandKernel(const Context& ctx,
               "positive for expand_v2 op.",
               expand_shape[i]));
       repeat_times[i] = expand_shape[i];
-    }
-    if (expand_shape[i] == -1) {
+    } else if (expand_shape[i] == -1) {
       out_shape[i] = vec_in_dims[i];
     } else if (expand_shape[i] == 0) {
       PADDLE_ENFORCE_EQ(
