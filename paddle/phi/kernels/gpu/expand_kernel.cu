@@ -43,7 +43,7 @@ void ExpandKernel(const Context& ctx,
               "The expanded size (%d) for non-existing dimensions must be "
               "positive for expand_v2 op.",
               expand_shape[i]));
-      repeat_times[i] = expand_shape[i];
+      out_shape[i] = expand_shape[i];
     } else if (expand_shape[i] == -1) {
       out_shape[i] = vec_in_dims[i];
     } else if (expand_shape[i] == 0) {
