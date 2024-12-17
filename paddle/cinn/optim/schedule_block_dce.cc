@@ -22,19 +22,20 @@ namespace cinn {
 namespace optim {
 
 /**
- * This pass eliminates dead schedule blocks (dead schedule blocks that do not
- * affect the final program output).
+ *
+ * This pass eliminates dead schedule blocks (those that do not affect the final
+ * program output).
  *
  * This pass is applicable in scenarios where there are redundant computations
- * or store operations in the program. For example, certain schedule blocks
- * may not influence the final output or may be completely unused. This commonly
- * occurs in deeply nested loops where some sub-blocks are executed but their
- * results are never used, resulting in wasted computation. The goal of this
- * pass is to analyze the dependencies and data flow of schedule blocks to
- * identify and remove those that are unnecessary, simplifying the code and
- * improving execution efficiency.
+ * or store operations in the program. For example, certain schedule blocks may
+ * not influence the final output or may be completely unused. This commonly
+ * occurs in deeply nested loops where some sub-blocks are executed, but their
+ * results are never used, leading to wasted computation. The goal of this pass
+ * is to analyze the dependencies and data flow of schedule blocks to identify
+ * and remove those that are unnecessary, simplifying the code and improving
+ * execution efficiency.
  *
- * If this pass is applicable, the following modifications will occur in the IR:
+ * When applied, this pass will perform the following modifications to the IR:
  * 1. The IR will be scanned for schedule blocks that do not influence the final
  * output. These blocks will be marked as dead schedule blocks.
  * 2. Dead schedule blocks will be removed from the IR, eliminating unnecessary
@@ -44,6 +45,13 @@ namespace optim {
  * remain unaffected, ensuring the correctness of the program.
  * 4. The final IR will be simplified, containing only the relevant computations
  * that contribute to the output, resulting in more efficient execution.
+ *
+ * Performance impact: This pass addresses performance issues by removing
+ * unnecessary computations, potentially improving program execution efficiency,
+ * especially when there are large amounts of unused computations. By
+ * eliminating dead schedule blocks, execution time and memory consumption can
+ * be reduced.
+ *
  */
 
 struct ScheduleBlockDCE : public ir::IRMutator<Expr*> {
