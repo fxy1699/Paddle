@@ -44,6 +44,28 @@ PD_DECLARE_bool(cinn_longlong2int);
 namespace cinn {
 namespace optim {
 
+/**
+ *
+ * Remove GPU for loops by transforming them into conditional statements
+ *
+ * This pass is applicable in scenarios where GPU for loops
+ * (i.e., loops with GPUBlock or GPUThread types) need to be replaced with
+ * conditional statements for more efficient or flexible code execution. This
+ * transformation is especially useful when the extent of the loop can be proved
+ * to be smaller than the GPU block/grid dimension.
+ *
+ * When applied, this pass will replace GPU for loops of type GPUBlock or
+ * GPUThread with if-then-else conditions. Specifically, if the loop’s extent is
+ * smaller than the corresponding grid or block dimension, a conditional check
+ * will be added to ensure proper bounds checking and execution. Otherwise, the
+ * body of the loop will be executed directly.
+ *
+ * Performance impact: This pass addresses the performance issue of unnecessary
+ * loop execution on threads that are not required, which could lead to better
+ * control over GPU kernel launch and memory usage.
+ *
+ */
+
 void RemoveGpuForLoops(ir::LoweredFunc fn) {
   struct Mutator : public ir::IRMutator<Expr *> {
     using ir::IRMutator<>::Visit;
