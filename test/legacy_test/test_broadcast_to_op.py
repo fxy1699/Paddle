@@ -132,6 +132,66 @@ class TestBroadcastToAPI(unittest.TestCase):
                 np.testing.assert_array_equal(res_3, np.tile(input, (1, 1)))
                 np.testing.assert_array_equal(res_4, zero_size_input)
 
+    def test_expand_zero_size_tensor_valid(self):
+        # 测试 0-size Tensor expand 到合法形状的情况
+        with paddle.static.program_guard(
+            paddle.static.Program(), paddle.static.Program()
+        ):
+            zero_input = np.random.random([0, 14]).astype("float32")
+            x = paddle.static.data(name="x", shape=[0, 14], dtype="float32")
+
+            # 合法 expand: 形状不变
+            out_1 = paddle.broadcast_to(x, shape=[0, 14])
+
+            exe = paddle.static.Executor(base.CPUPlace())
+            res_1 = exe.run(
+                feed={"x": zero_input},
+                fetch_list=[out_1],
+            )
+
+            # 验证结果
+            np.testing.assert_array_equal(res_1[0], zero_input)
+            self.assertEqual(res_1[0].shape, (0, 14))
+
+    def test_expand_zero_size_tensor_invalid(self):
+        # 测试非法的 expand 情况，必须报错
+        with paddle.static.program_guard(
+            paddle.static.Program(), paddle.static.Program()
+        ):
+            zero_input = np.random.random([0, 14]).astype("float32")
+            x = paddle.static.data(name="x", shape=[0, 14], dtype="float32")
+
+            # 非法 expand：第二维度从 14 -> 20
+            with self.assertRaises(ValueError):
+                paddle.broadcast_to(x, shape=[0, 20])
+
+            # 非法 expand：第一维度从 0 -> 2
+            with self.assertRaises(ValueError):
+                paddle.broadcast_to(x, shape=[2, 14])
+
+    def test_expand_non_zero_size_tensor(self):
+        # 测试非 0-size Tensor expand 到合法形状
+        with paddle.static.program_guard(
+            paddle.static.Program(), paddle.static.Program()
+        ):
+            input_data = np.random.random([2, 1]).astype("float32")
+            x = paddle.static.data(name="x", shape=[2, 1], dtype="float32")
+
+            # expand 到 [2, 3]
+            out_1 = paddle.broadcast_to(x, shape=[2, 3])
+            # expand 到 [-1, 3] (-1 表示保持输入对应维度)
+            out_2 = paddle.broadcast_to(x, shape=[-1, 3])
+
+            exe = paddle.static.Executor(base.CPUPlace())
+            res_1, res_2 = exe.run(
+                feed={"x": input_data},
+                fetch_list=[out_1, out_2],
+            )
+
+            expected_output = np.tile(input_data, (1, 3))
+            np.testing.assert_array_equal(res_1, expected_output)
+            np.testing.assert_array_equal(res_2, expected_output)
+
 
 if __name__ == "__main__":
     unittest.main()
