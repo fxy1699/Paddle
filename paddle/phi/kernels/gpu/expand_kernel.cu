@@ -35,6 +35,16 @@ void ExpandKernel(const Context& ctx,
   auto out_shape = vec_in_dims;
   bool has_zero_dim = false;
   for (size_t i = 0; i < out_shape.size(); ++i) {
+    if (i < diff) {
+      PADDLE_ENFORCE_GE(
+          expand_shape[i],
+          0,
+          common::errors::InvalidArgument(
+              "The expanded size (%d) for non-existing dimensions must be "
+              "positive for expand_v2 op.",
+              expand_shape[i]));
+      repeat_times[i] = expand_shape[i];
+    }
     if (expand_shape[i] == -1) {
       out_shape[i] = vec_in_dims[i];
     } else if (expand_shape[i] == 0) {

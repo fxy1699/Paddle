@@ -40,6 +40,16 @@ void Expand(const Context& ctx,
     return;
   }
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
+    if (i < diff) {
+      PADDLE_ENFORCE_GE(
+          expand_shape[i],
+          0,
+          common::errors::InvalidArgument(
+              "The expanded size (%d) for non-existing dimensions must be "
+              "positive for expand_v2 op.",
+              expand_shape[i]));
+      repeat_times[i] = expand_shape[i];
+    }
     if (expand_shape[i] == 0) {
       PADDLE_ENFORCE_EQ(
           vec_in_dims[i] == 1 || vec_in_dims[i] == expand_shape[i],
