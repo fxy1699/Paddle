@@ -300,33 +300,28 @@ class TestCopySignBroadcastCase3(TestCopySignAPI):
         self.y = (np.random.randn(3, 4, 5) * 10).astype(dtype)
 
 
-class TestCopySignZeroDimCase(unittest.TestCase):
-    def setUp(self):
-        self.input_init()
-        self.place_init()
-
+class TestCopySignZeroDimCase3(TestCopySignAPI):
     def input_init(self):
         dtype = np.float16
-        self.x = np.array(1.23, dtype=dtype)
-        self.y = np.empty([0], dtype=dtype)
+        # x 是 0-size 的张量，y 是一个形状匹配的张量
+        self.x = np.zeros(shape=(0, 4, 5)).astype(dtype)
+        self.y = (np.random.randn(0, 4, 5) * 10).astype(dtype)
 
-    def place_init(self):
-        self.place = (
-            paddle.CUDAPlace(0)
-            if paddle.is_compiled_with_cuda()
-            else paddle.CPUPlace()
-        )
 
-    def test_dygraph_api(self):
-        paddle.disable_static()
-        x = paddle.to_tensor(self.x)
-        y = paddle.to_tensor(self.y)
-        out = paddle.copysign(x, y)
-        out_ref = ref_copysign(self.x, self.y)
-        np.testing.assert_allclose(out_ref, out.numpy())
-        out_ref_dtype = out_ref.dtype
-        np.testing.assert_equal((out_ref_dtype == out.numpy().dtype), True)
-        paddle.enable_static()
+class TestCopySignZeroDimCase4(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 是一个正常的多维数组，y 是 0-size 的张量
+        self.x = (np.random.randn(3, 4, 5) * 10).astype(dtype)
+        self.y = np.zeros(shape=(0, 4, 5)).astype(dtype)
+
+
+class TestCopySignZeroDimCase5(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 和 y 均为 0-size 张量，但形状不同
+        self.x = np.zeros(shape=(0, 1, 5)).astype(dtype)
+        self.y = np.zeros(shape=(0, 3, 5)).astype(dtype)
 
 
 if __name__ == "__main__":
