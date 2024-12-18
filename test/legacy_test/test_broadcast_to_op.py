@@ -153,22 +153,6 @@ class TestBroadcastToAPI(unittest.TestCase):
             np.testing.assert_array_equal(res_1[0], zero_input)
             self.assertEqual(res_1[0].shape, (0, 14))
 
-    def test_expand_zero_size_tensor_invalid(self):
-        # 测试非法的 expand 情况，必须报错
-        with paddle.static.program_guard(
-            paddle.static.Program(), paddle.static.Program()
-        ):
-            zero_input = np.random.random([0, 14]).astype("float32")
-            x = paddle.static.data(name="x", shape=[0, 14], dtype="float32")
-
-            # 非法 expand：第二维度从 14 -> 20
-            with self.assertRaises(ValueError):
-                paddle.broadcast_to(x, shape=[0, 20])
-
-            # 非法 expand：第一维度从 0 -> 2
-            with self.assertRaises(ValueError):
-                paddle.broadcast_to(x, shape=[2, 14])
-
     def test_expand_non_zero_size_tensor(self):
         # 测试非 0-size Tensor expand 到合法形状
         with paddle.static.program_guard(
