@@ -311,17 +311,89 @@ class TestCopySignZeroDimCase3(TestCopySignAPI):
 class TestCopySignZeroDimCase4(TestCopySignAPI):
     def input_init(self):
         dtype = np.float16
-        # x 是一个正常的多维数组，y 是 0-size 的张量
-        self.x = (np.random.randn(3, 4, 5) * 10).astype(dtype)
-        self.y = np.zeros(shape=(0, 4, 5)).astype(dtype)
+        # x 和 y 均为 0-size 张量，但形状不同
+        self.x = np.zeros(shape=(0, 1, 5)).astype(dtype)
+        self.y = np.zeros(shape=(0, 3, 5)).astype(dtype)
 
 
 class TestCopySignZeroDimCase5(TestCopySignAPI):
     def input_init(self):
         dtype = np.float16
-        # x 和 y 均为 0-size 张量，但形状不同
-        self.x = np.zeros(shape=(0, 1, 5)).astype(dtype)
-        self.y = np.zeros(shape=(0, 3, 5)).astype(dtype)
+        # x 是 0-size 的张量，y 是形状为 (0,) 的张量
+        self.x = np.zeros(shape=(0, 1)).astype(dtype)
+        self.y = np.zeros(shape=(0,)).astype(dtype)
+
+
+class TestCopySignZeroDimCase6(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 是 0-size 的张量，y 是形状为 (1, 0) 的张量
+        self.x = np.zeros(shape=(0,)).astype(dtype)
+        self.y = np.zeros(shape=(1, 0)).astype(dtype)
+
+
+class TestCopySignZeroDimCase7(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 是 0-size 的张量，y 是形状为 (1, 3, 0) 的张量
+        self.x = np.zeros(shape=(0,)).astype(dtype)
+        self.y = np.zeros(shape=(1, 3, 0)).astype(dtype)
+
+
+class TestCopySignZeroDimCase8(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 是形状为 (1, 0) 的张量，y 是 0-size 的张量
+        self.x = np.zeros(shape=(1, 0)).astype(dtype)
+        self.y = np.zeros(shape=(0,)).astype(dtype)
+
+
+class TestCopySignZeroDimCase9(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 是 0-size 的张量，y 是形状为 (0, 1) 的张量
+        self.x = np.zeros(shape=(0,)).astype(dtype)
+        self.y = np.zeros(shape=(0, 1)).astype(dtype)
+
+
+class TestCopySignZeroDimCase10(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 是 0-size 的二维张量，y 是形状为 (1, 1, 0, 1) 的张量
+        self.x = np.zeros(shape=(0, 0)).astype(dtype)
+        self.y = np.zeros(shape=(1, 1, 0, 1)).astype(dtype)
+
+
+class TestCopySignZeroDimCase11(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 是形状为 (1, 1, 0, 1) 的张量，y 是 0-size 的二维张量
+        self.x = np.zeros(shape=(1, 1, 0, 1)).astype(dtype)
+        self.y = np.zeros(shape=(0, 0)).astype(dtype)
+
+
+class TestCopySignZeroDimCase12(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 是形状为 (1, 1, 0, 1) 的张量，y 是形状为 (0, 0, 0) 的张量
+        self.x = np.zeros(shape=(1, 1, 0, 1)).astype(dtype)
+        self.y = np.zeros(shape=(0, 0, 0)).astype(dtype)
+
+
+class TestCopySignZeroDimCase13(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 是形状为 (0, 1, 0, 0, 0) 的张量，y 是 0-size 的张量
+        self.x = np.zeros(shape=(0, 1, 0, 0, 0)).astype(dtype)
+        self.y = np.zeros(shape=(0,)).astype(dtype)
+
+
+class TestCopySignZeroDimCase14(TestCopySignAPI):
+    def input_init(self):
+        dtype = np.float16
+        # x 是 0-size 的张量，y 是形状为 (0, 1, 0, 0, 0) 的张量
+        self.x = np.zeros(shape=(0,)).astype(dtype)
+        self.y = np.zeros(shape=(0, 1, 0, 0, 0)).astype(dtype)
 
 
 if __name__ == "__main__":

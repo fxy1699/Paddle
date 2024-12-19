@@ -115,7 +115,9 @@ void CopySignKernel(const Context& dev_ctx,
                 expand_shape[i]));
         repeat_times[i] = 0;
       } else if (expand_shape[i] > 0) {
-        if (vec_in_dims[i] != 1) {
+        if (vec_in_dims[i] == 0) {
+          repeat_times[i] = 0;
+        } else if (vec_in_dims[i] != 1) {
           PADDLE_ENFORCE_EQ(
               vec_in_dims[i],
               expand_shape[i],
