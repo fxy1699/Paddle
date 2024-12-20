@@ -129,35 +129,40 @@ class TestCopySignAPI(unittest.TestCase):
 
     def test_static_api(self):
         paddle.enable_static()
-        with paddle.static.program_guard(paddle.static.Program()):
-            x = paddle.static.data(
-                name='x', shape=self.x.shape, dtype=self.x.dtype
-            )
-            if isinstance(self.y, (float, int)):
-                y = self.y
-            else:
-                y = paddle.static.data(
-                    name='y', shape=self.y.shape, dtype=self.x.dtype
-                )
-            out = paddle.copysign(x, y)
-            exe = paddle.static.Executor(self.place)
-            if isinstance(self.y, (float, int)):
-                res = exe.run(
-                    paddle.static.default_main_program(),
-                    feed={"x": self.x},
-                    fetch_list=[out],
-                )
-            else:
-                res = exe.run(
-                    paddle.static.default_main_program(),
-                    feed={"x": self.x, "y": self.y},
-                    fetch_list=[out],
-                )
 
-            out_ref = ref_copysign(self.x, self.y)
-            np.testing.assert_allclose(out_ref, res[0])
-            out_ref_dtype = out_ref.dtype
-            np.testing.assert_equal((out_ref_dtype == res[0].dtype), True)
+        def run(place):
+            with paddle.static.program_guard(paddle.static.Program()):
+                x = paddle.static.data(
+                    name='x', shape=self.x.shape, dtype=self.x.dtype
+                )
+                if isinstance(self.y, (float, int)):
+                    y = self.y
+                else:
+                    y = paddle.static.data(
+                        name='y', shape=self.y.shape, dtype=self.x.dtype
+                    )
+                out = paddle.copysign(x, y)
+                exe = paddle.static.Executor(place)
+                if isinstance(self.y, (float, int)):
+                    res = exe.run(
+                        paddle.static.default_main_program(),
+                        feed={"x": self.x},
+                        fetch_list=[out],
+                    )
+                else:
+                    res = exe.run(
+                        paddle.static.default_main_program(),
+                        feed={"x": self.x, "y": self.y},
+                        fetch_list=[out],
+                    )
+
+                out_ref = ref_copysign(self.x, self.y)
+                np.testing.assert_allclose(out_ref, res[0])
+                out_ref_dtype = out_ref.dtype
+                np.testing.assert_equal((out_ref_dtype == res[0].dtype), True)
+
+        for place in self.place:
+            run(place)
         paddle.disable_static()
 
     def test_dygraph_api(self):
