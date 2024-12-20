@@ -176,6 +176,50 @@ class TestBroadcastToAPI(unittest.TestCase):
             np.testing.assert_array_equal(res_1, expected_output)
             np.testing.assert_array_equal(res_2, expected_output)
 
+    def test_expand_zero_size_tensor_valid_case2(self):
+        # 测试 0-size Tensor expand 到更高维度的情况
+        with paddle.static.program_guard(
+            paddle.static.Program(), paddle.static.Program()
+        ):
+            zero_input = np.random.random([3, 4, 5]).astype("float32")
+            x = paddle.static.data(name="x", shape=[3, 4, 5], dtype="float32")
+
+            # 合法 expand: 形状从 [3, 4, 6] 到 [0, 3, 4, 5]
+            out_1 = paddle.broadcast_to(x, shape=[0, 3, 4, 5])
+
+            exe = paddle.static.Executor(base.CPUPlace())
+            res_1 = exe.run(
+                feed={"x": zero_input},
+                fetch_list=[out_1],
+            )
+
+            # 验证结果
+            self.assertEqual(res_1[0].shape, (0, 3, 4, 5))
+
+    def test_expand_zero_size_tensor_with_minus_one(self):
+        # 测试 0-size Tensor expand 到带有 -1 的合法形状
+        with paddle.static.program_guard(
+            paddle.static.Program(), paddle.static.Program()
+        ):
+            zero_input = np.random.random([0, 3]).astype("float32")
+            x = paddle.static.data(name="x", shape=[0, 3], dtype="float32")
+
+            # 使用 -1 表示保持输入维度不变
+            out_1 = paddle.broadcast_to(x, shape=[0, -1])
+            out_2 = paddle.broadcast_to(x, shape=[-1, 3])
+
+            exe = paddle.static.Executor(base.CPUPlace())
+            res_1, res_2 = exe.run(
+                feed={"x": zero_input},
+                fetch_list=[out_1, out_2],
+            )
+
+            # 验证结果
+            np.testing.assert_array_equal(res_1, zero_input)
+            np.testing.assert_array_equal(res_2, zero_input)
+            self.assertEqual(res_1.shape, (0, 3))
+            self.assertEqual(res_2.shape, (0, 3))
+
 
 if __name__ == "__main__":
     unittest.main()
