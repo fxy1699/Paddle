@@ -34,6 +34,10 @@ void ExpandKernel(const Context& ctx,
   vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
   auto out_shape = vec_in_dims;
   bool has_zero_dim = false;
+  if (in_dims.size() == 0) {
+    ctx.template Alloc<T>(out);
+    return;
+  }
   for (size_t i = 0; i < out_shape.size(); ++i) {
     if (i < diff) {
       PADDLE_ENFORCE_GE(

@@ -32,6 +32,10 @@ void ExpandKernel(const Context& ctx,
   vec_in_dims.insert(vec_in_dims.begin(), diff, 1);
   auto final_expand_shape = vec_in_dims;
   bool has_zero_dim = false;
+  if (in_dims.size() == 0) {
+    phi::Copy<Context>(ctx, x, ctx.GetPlace(), false, out);
+    return;
+  }
   for (size_t i = 0; i < vec_in_dims.size(); ++i) {
     if (i < diff) {
       PADDLE_ENFORCE_GE(
