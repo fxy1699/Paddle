@@ -21,9 +21,34 @@ namespace cinn {
 namespace optim {
 
 /**
- * Given Expr AST, translate dynamic shape in buffers to
- * static shape, the pass is just used on Nvidia GPU temporarily.
+ *
+ * This pass processes buffers with dynamic shapes to ensure their validity on
+ * target hardware (especially GPUs) and checks whether shared memory usage
+ * adheres to hardware constraints.
+ *
+ * This pass is applicable in scenarios where tensors or buffers in the IR have
+ * dynamic shapes that need runtime evaluation or simplification, particularly
+ * in environments like CUDA GPU computations where shared or local memory has
+ * strict size limits. Typical cases include dynamic shape handling in GPU
+ * kernels.
+ *
+ * When applied, this pass makes the following modifications to the IR:
+ * - Performs symbolic analysis and simplifies expressions related to tensor or
+ * buffer shapes.
+ * - Ensures that dynamic shapes can be upper-bounded and verifies that the
+ * resulting expressions are constants.
+ * - Calculates the size of buffers allocated in shared memory and checks
+ * whether the size exceeds the hardware's maximum shared memory capacity.
+ * - Throws runtime or compile-time errors if shape expressions cannot be
+ * simplified or validated.
+ *
+ * Performance impact: This pass improves program stability and execution
+ * efficiency in dynamic shape scenarios by ensuring shape expressions are valid
+ * and shared memory allocation is reasonable, avoiding runtime crashes or
+ * inefficiencies.
+ *
  */
+
 void CudaTransBufferWithDynamicShape(ir::Expr* expr);
 
 }  // namespace optim
